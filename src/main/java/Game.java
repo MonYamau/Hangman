@@ -21,23 +21,23 @@ public class Game {
             """;
     private static final String INCORRECT_INPUT_SCRIPT = "Некорректный ввод! Введи одну букву кириллицы.";
 
-    private static String word;
-    private static int errorCounter;
-    private static String field;
-    private static String attemptList;
+    private static String secretWord;
+    private static int mistakeCount;
+    private static String displayField;
+    private static String usedLetters;
 
 
 
     public static void main(String[] args) {
         System.out.printf("Привет! %s", INSTRUCTIONS_SCRIPT);
-        callInputScript();
+        processStartChoice();
     }
 
-    private static void callInputScript(){
+    private static void processStartChoice(){
         while (true) {
             switch (INPUT.nextLine().toUpperCase()) {
                 case "Н":
-                    gameLoop();
+                    startGameRound();
                 case "В":
                     exit(0);
                 default:
@@ -46,19 +46,19 @@ public class Game {
         }
     }
 
-    private static void gameLoop(){
-        word = generateWord();
-        errorCounter = 0;
-        field = "_ ".repeat(word.length()).trim();
-        attemptList = "";
-        System.out.printf("Начинаем! Загадано слово из %d букв.\n", word.length());
-        System.out.printf("[%s]\n", field);
+    private static void startGameRound(){
+        secretWord = generateWord();
+        mistakeCount = 0;
+        displayField = "_ ".repeat(secretWord.length()).trim();
+        usedLetters = "";
+        System.out.printf("Начинаем! Загадано слово из %d букв.\n", secretWord.length());
+        System.out.printf("[%s]\n", displayField);
 
         while (!isGameOver()) {
             System.out.println("Попробуй ввести букву:");
-            String letter = validateInput();
-            checkLetter(letter);
-            achieveVictory();
+            String letter = validateInputLetter();
+            processGuessedLetter(letter);
+            checkVictory();
         }
     }
 
@@ -74,7 +74,7 @@ public class Game {
         return dictionaryWords.get(randomIndex);
     }
 
-    private static String validateInput(){
+    private static String validateInputLetter(){
         String letter = null;
         boolean validate = false;
         while (!validate) {
@@ -94,49 +94,49 @@ public class Game {
         return letter;
     }
 
-    private static void checkLetter(String letter){
-        if (!attemptList.contains(letter)) {
-            attemptList = (attemptList + " " + letter).trim();
-            errorTrack(letter);
+    private static void processGuessedLetter(String letter){
+        if (!usedLetters.contains(letter)) {
+            usedLetters = (usedLetters + " " + letter).trim();
+            incrementErrorCount(letter);
             openLetter(letter);
-            System.out.printf("Использованные буквы: [%s]\n", attemptList);
-            System.out.printf("Количество ошибок: %d\n", errorCounter);
-            System.out.printf("[%s]\n", field);
-            new HangmanRenderer().printHangman(errorCounter);
+            System.out.printf("Использованные буквы: [%s]\n", usedLetters);
+            System.out.printf("Количество ошибок: %d\n", mistakeCount);
+            System.out.printf("[%s]\n", displayField);
+            new HangmanRenderer().printHangman(mistakeCount);
         } else {
             System.out.println("Буква уже была использована!");
         }
     }
 
-    private static void errorTrack(String letter){
-        if (!word.contains(letter)) {
+    private static void incrementErrorCount(String letter){
+        if (!secretWord.contains(letter)) {
             System.out.printf("Буквы \"%s\" нет в данном слове.\n", letter);
-            errorCounter++;
+            mistakeCount++;
         }
     }
 
     private static void openLetter(String letter){
-        List<String> iterateWord = new ArrayList<>(Arrays.asList(word.split("")));
-        List<String> iterateField = new ArrayList<>(Arrays.asList(field.split(" ")));
-        for (int i = 0; i < word.length(); i++) {
+        List<String> iterateWord = new ArrayList<>(Arrays.asList(secretWord.split("")));
+        List<String> iterateField = new ArrayList<>(Arrays.asList(displayField.split(" ")));
+        for (int i = 0; i < secretWord.length(); i++) {
             if (iterateWord.get(i).equals(letter)) {
                 iterateField.set(i, letter);
             }
         }
-        field = String.join(" ", iterateField);
+        displayField = String.join(" ", iterateField);
     }
 
-    private static void achieveVictory(){
-        if (!field.contains("_")) {
-            System.out.printf("ТЫ ВЫИГРАЛ! ^О^\nЗагаданное слово: %s\n" + INSTRUCTIONS_SCRIPT, word);
-            callInputScript();
+    private static void checkVictory(){
+        if (!displayField.contains("_")) {
+            System.out.printf("ТЫ ВЫИГРАЛ! ^О^\nЗагаданное слово: %s\n" + INSTRUCTIONS_SCRIPT, secretWord);
+            processStartChoice();
         }
     }
 
     private static boolean isGameOver(){
-        if (errorCounter == MAX_ERROR) {
-            System.out.printf("Ты проиграл Х_Х\nЗагаданное слово: %s\n" + INSTRUCTIONS_SCRIPT, word);
-            callInputScript();
+        if (mistakeCount == MAX_ERROR) {
+            System.out.printf("Ты проиграл Х_Х\nЗагаданное слово: %s\n" + INSTRUCTIONS_SCRIPT, secretWord);
+            processStartChoice();
         }
         return false;
     }
