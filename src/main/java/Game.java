@@ -70,7 +70,6 @@ public class Game {
             } else {
                 System.out.println("Буква уже была использована!");
             }
-            checkVictory();
         }
     }
 
@@ -128,16 +127,13 @@ public class Game {
         displayField = String.join(" ", iterateField);
     }
 
-    private static void checkVictory(){
-        if (!displayField.contains("_")) {
-            System.out.printf("ТЫ ВЫИГРАЛ! ^О^\nЗагаданное слово: %s\n" + INSTRUCTIONS_SCRIPT, secretWord);
-            processStartChoice();
-        }
-    }
-
     private static boolean isGameOver(){
         if (mistakeCount == MAX_ERROR) {
             System.out.printf("Ты проиграл Х_Х\nЗагаданное слово: %s\n" + INSTRUCTIONS_SCRIPT, secretWord);
+            processStartChoice();
+        }
+        if (!displayField.contains("_")) {
+            System.out.printf("ТЫ ВЫИГРАЛ! ^О^\nЗагаданное слово: %s\n" + INSTRUCTIONS_SCRIPT, secretWord);
             processStartChoice();
         }
         return false;
