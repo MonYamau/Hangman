@@ -17,11 +17,13 @@ public class Game {
 
     private static final int MAX_ERROR = 7;
     private static final String ACCEPTABLE_LETTERS = "[а-яёА-ЯЁ]+";
+    private static final String START = "Н";
+    private static final String EXIT = "В";
     private static final String INSTRUCTIONS_SCRIPT = """
             
             Желаешь начать новую игру?
-            [Введите "Н", чтобы приступить к игре]
-            [Введите "В", чтобы отменить]
+            [Введите "Н", чтобы начать новую игру]
+            [Введите "В", чтобы выйти]
             """;
     private static final String INCORRECT_INPUT_SCRIPT = "Некорректный ввод! Введи одну букву кириллицы.";
 
@@ -39,9 +41,9 @@ public class Game {
     private static void processStartChoice() {
         while (true) {
             switch (INPUT.nextLine().toUpperCase()) {
-                case "Н":
+                case START:
                     startGameRound();
-                case "В":
+                case EXIT:
                     exit(0);
                 default:
                     System.out.println(INCORRECT_INPUT_SCRIPT);
