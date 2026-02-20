@@ -8,15 +8,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
+
 import static java.lang.System.exit;
 
 public class Game {
     private static final Scanner INPUT = new Scanner(System.in);
     private static final Path PATH = Paths.get("src/main/resources/dictionary.txt");
+
     private static final int MAX_ERROR = 7;
     private static final String ACCEPTABLE_LETTERS = "[а-яёА-ЯЁ]+";
     private static final String INSTRUCTIONS_SCRIPT = """
-
+            
             Желаешь начать новую игру?
             [Введите "Н", чтобы приступить к игре]
             [Введите "В", чтобы отменить]
@@ -29,13 +31,12 @@ public class Game {
     private static String usedLetters;
 
 
-
     public static void main(String[] args) {
         System.out.printf("Привет! %s", INSTRUCTIONS_SCRIPT);
         processStartChoice();
     }
 
-    private static void processStartChoice(){
+    private static void processStartChoice() {
         while (true) {
             switch (INPUT.nextLine().toUpperCase()) {
                 case "Н":
@@ -48,7 +49,7 @@ public class Game {
         }
     }
 
-    private static void startGameRound(){
+    private static void startGameRound() {
         secretWord = generateWord();
         mistakeCount = 0;
         displayField = "_ ".repeat(secretWord.length()).trim();
@@ -58,8 +59,8 @@ public class Game {
 
         while (!isGameOver()) {
             System.out.println("Попробуй ввести букву:");
-            String letter = validateInputLetter();
-            if(!isUsedLetter(letter)){
+            char letter = validateInputLetter();
+            if (!isUsedLetter(letter)) {
                 usedLetters = (usedLetters + " " + letter).trim();
                 incrementErrorCount(letter);
                 openLetter(letter);
@@ -73,26 +74,26 @@ public class Game {
         }
     }
 
-    private static String generateWord(){
+    private static String generateWord() {
         Random random = new Random();
         List<String> dictionaryWords;
         try {
             dictionaryWords = Arrays.asList((Files.readString(PATH)).split(" "));
         } catch (IOException e) {
-            throw new IllegalStateException("Couldn't read the file: " + PATH, e);
+            throw new IllegalStateException("Couldn't read the file: " + PATH.toAbsolutePath(), e);
         }
         int randomIndex = random.nextInt(dictionaryWords.size());
         return dictionaryWords.get(randomIndex);
     }
 
-    private static String validateInputLetter(){
-        String letter = null;
+    private static char validateInputLetter() {
+        String inputValue = null;
         boolean validate = false;
         while (!validate) {
             validate = true;
-            letter = INPUT.nextLine();
-            boolean isRus = Pattern.matches(ACCEPTABLE_LETTERS, letter);
-            if (letter.length() != 1 || !isRus) {
+            inputValue = INPUT.nextLine();
+            boolean isRus = Pattern.matches(ACCEPTABLE_LETTERS, inputValue);
+            if (inputValue.length() != 1 || !isRus) {
                 validate = false;
                 try {
                     throw new IOException();
@@ -100,34 +101,35 @@ public class Game {
                     System.out.println(INCORRECT_INPUT_SCRIPT);
                 }
             }
-            letter = letter.toUpperCase();
+            inputValue = inputValue.toUpperCase();
         }
+        char letter = inputValue.charAt(0);
         return letter;
     }
 
-    private static boolean isUsedLetter(String letter){
-        return usedLetters.contains(letter);
+    private static boolean isUsedLetter(char letter) {
+        return usedLetters.contains(String.valueOf(letter));
     }
 
-    private static void incrementErrorCount(String letter){
-        if (!secretWord.contains(letter)) {
+    private static void incrementErrorCount(char letter) {
+        if (!secretWord.contains(String.valueOf(letter))) {
             System.out.printf("Буквы \"%s\" нет в данном слове.\n", letter);
             mistakeCount++;
         }
     }
 
-    private static void openLetter(String letter){
+    private static void openLetter(char letter) {
         List<String> iterateWord = new ArrayList<>(Arrays.asList(secretWord.split("")));
         List<String> iterateField = new ArrayList<>(Arrays.asList(displayField.split(" ")));
         for (int i = 0; i < secretWord.length(); i++) {
-            if (iterateWord.get(i).equals(letter)) {
-                iterateField.set(i, letter);
+            if (iterateWord.get(i).equals(String.valueOf(letter))) {
+                iterateField.set(i, String.valueOf(letter));
             }
         }
         displayField = String.join(" ", iterateField);
     }
 
-    private static boolean isGameOver(){
+    private static boolean isGameOver() {
         if (mistakeCount == MAX_ERROR) {
             System.out.printf("Ты проиграл Х_Х\nЗагаданное слово: %s\n" + INSTRUCTIONS_SCRIPT, secretWord);
             processStartChoice();
