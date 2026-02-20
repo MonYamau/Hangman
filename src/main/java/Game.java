@@ -1,5 +1,7 @@
 package main.java;
 
+import main.java.util.HangmanRenderer;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,7 +59,17 @@ public class Game {
         while (!isGameOver()) {
             System.out.println("Попробуй ввести букву:");
             String letter = validateInputLetter();
-            processGuessedLetter(letter);
+            if(!isUsedLetter(letter)){
+                usedLetters = (usedLetters + " " + letter).trim();
+                incrementErrorCount(letter);
+                openLetter(letter);
+                System.out.printf("Использованные буквы: [%s]\n", usedLetters);
+                System.out.printf("Количество ошибок: %d\n", mistakeCount);
+                System.out.printf("[%s]\n", displayField);
+                HangmanRenderer.printHangman(mistakeCount);
+            } else {
+                System.out.println("Буква уже была использована!");
+            }
             checkVictory();
         }
     }
@@ -94,18 +106,8 @@ public class Game {
         return letter;
     }
 
-    private static void processGuessedLetter(String letter){
-        if (!usedLetters.contains(letter)) {
-            usedLetters = (usedLetters + " " + letter).trim();
-            incrementErrorCount(letter);
-            openLetter(letter);
-            System.out.printf("Использованные буквы: [%s]\n", usedLetters);
-            System.out.printf("Количество ошибок: %d\n", mistakeCount);
-            System.out.printf("[%s]\n", displayField);
-            new HangmanRenderer().printHangman(mistakeCount);
-        } else {
-            System.out.println("Буква уже была использована!");
-        }
+    private static boolean isUsedLetter(String letter){
+        return usedLetters.contains(letter);
     }
 
     private static void incrementErrorCount(String letter){

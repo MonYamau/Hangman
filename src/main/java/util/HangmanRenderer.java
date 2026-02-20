@@ -1,6 +1,8 @@
-package main.java;
+package main.java.util;
 
-public class HangmanRenderer {
+public final class HangmanRenderer {
+    private HangmanRenderer() {}
+
     private static final String[] hangmanStatus = {
                         """
                         _________
@@ -61,7 +63,7 @@ public class HangmanRenderer {
                         |___________"""
     };
 
-    public void printHangman(int numPicture) {
+    public static void printHangman(int numPicture) {
         System.out.println(hangmanStatus[numPicture]);
     }
 }
