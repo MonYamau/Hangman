@@ -3,28 +3,29 @@ package main.java;
 import main.java.util.HangmanRenderer;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.System.exit;
-
 public class Game {
-    private static final Scanner INPUT = new Scanner(System.in);
-    private static final Path PATH = Paths.get("src/main/resources/dictionary.txt");
+    private static final Scanner SCANNER = new Scanner(System.in, StandardCharsets.UTF_8);
+    private static final Path PATH = Path.of("/resources/dictionary.txt").toAbsolutePath();
 
     private static final int MAX_ERROR = 7;
-    private static final String ACCEPTABLE_LETTERS = "[а-яёА-ЯЁ]+";
+    private static final String MASK_SYMBOL = "_ ";
+    private static final String ONE_RUS_LETTER_REGEX = "[а-яёА-ЯЁ]";
+    private static final Pattern ONE_RUS_LETTER_PATTERN = Pattern.compile(ONE_RUS_LETTER_REGEX);
     private static final String START = "Н";
     private static final String EXIT = "В";
     private static final String INSTRUCTIONS_SCRIPT = """
             
             Желаешь начать новую игру?
-            [Введите "Н", чтобы начать новую игру]
-            [Введите "В", чтобы выйти]
-            """;
+            [Введите '%s', чтобы начать новую игру]
+            [Введите '%s', чтобы выйти]
+            """.formatted(START, EXIT);
     private static final String INCORRECT_INPUT_SCRIPT = "Некорректный ввод! Введи одну букву кириллицы.";
 
     private static String secretWord;
@@ -34,17 +35,17 @@ public class Game {
 
 
     public static void main(String[] args) {
-        System.out.printf("Привет! %s", INSTRUCTIONS_SCRIPT);
+        System.out.printf("Привет! " + INSTRUCTIONS_SCRIPT);
         processStartChoice();
     }
 
     private static void processStartChoice() {
         while (true) {
-            switch (INPUT.nextLine().toUpperCase()) {
+            switch (SCANNER.nextLine().toUpperCase()) {
                 case START:
                     startGameRound();
                 case EXIT:
-                    exit(0);
+                    return;
                 default:
                     System.out.println(INCORRECT_INPUT_SCRIPT);
             }
@@ -54,70 +55,81 @@ public class Game {
     private static void startGameRound() {
         secretWord = generateWord();
         mistakeCount = 0;
-        displayField = "_ ".repeat(secretWord.length()).trim();
+        displayField = makeMask();
         usedLetters = "";
         System.out.printf("Начинаем! Загадано слово из %d букв.\n", secretWord.length());
         System.out.printf("[%s]\n", displayField);
 
         while (!isGameOver()) {
-            System.out.println("Попробуй ввести букву:");
-            char letter = validateInputLetter();
+            char letter = inputRussianLetter();
+            letter = Character.toUpperCase(letter);
             if (!isUsedLetter(letter)) {
-                usedLetters = (usedLetters + " " + letter).trim();
-                incrementErrorCount(letter);
-                openLetter(letter);
-                System.out.printf("Использованные буквы: [%s]\n", usedLetters);
-                System.out.printf("Количество ошибок: %d\n", mistakeCount);
-                System.out.printf("[%s]\n", displayField);
-                HangmanRenderer.printHangman(mistakeCount);
+                addUsedLetters(letter);
+                if (isSecretWordLetter(letter)) {
+                    openLetter(letter);
+                    showGameRoundStatus();
+                } else {
+                    mistakeCount++;
+                    printMistakeLetterMessage(letter);
+                    showGameRoundStatus();
+                }
             } else {
-                System.out.println("Буква уже была использована!");
+                printUsedLetterMessage();
             }
         }
     }
 
     private static String generateWord() {
         Random random = new Random();
-        List<String> dictionaryWords;
+        List<String> dictionary;
         try {
-            dictionaryWords = Arrays.asList((Files.readString(PATH)).split(" "));
+            dictionary = Arrays.asList((Files.readString(PATH)).split(" "));
         } catch (IOException e) {
-            throw new IllegalStateException("Couldn't read the file: " + PATH.toAbsolutePath(), e);
+            throw new IllegalStateException("Couldn't read the file: " + PATH.toAbsolutePath());
         }
-        int randomIndex = random.nextInt(dictionaryWords.size());
-        return dictionaryWords.get(randomIndex);
+        int randomIndex = random.nextInt(dictionary.size());
+        return dictionary.get(randomIndex);
     }
 
-    private static char validateInputLetter() {
-        String inputValue = null;
-        boolean validate = false;
-        while (!validate) {
-            validate = true;
-            inputValue = INPUT.nextLine();
-            boolean isRus = Pattern.matches(ACCEPTABLE_LETTERS, inputValue);
-            if (inputValue.length() != 1 || !isRus) {
-                validate = false;
-                try {
-                    throw new IOException();
-                } catch (IOException e) {
-                    System.out.println(INCORRECT_INPUT_SCRIPT);
-                }
+    private static String makeMask() {
+        return MASK_SYMBOL.repeat(secretWord.length()).trim();
+    }
+
+    private static char inputRussianLetter() {
+        System.out.println("Попробуй ввести букву:");
+        while (true) {
+            String inputValue = SCANNER.nextLine();
+            if (isOneRussianLetter(inputValue)) {
+                return inputValue.charAt(0);
             }
-            inputValue = inputValue.toUpperCase();
+            System.out.println(INCORRECT_INPUT_SCRIPT);
         }
-        char letter = inputValue.charAt(0);
-        return letter;
+    }
+
+    private static boolean isOneRussianLetter(String inputValue) {
+        Matcher matcher = ONE_RUS_LETTER_PATTERN.matcher(inputValue);
+        return matcher.matches();
     }
 
     private static boolean isUsedLetter(char letter) {
         return usedLetters.contains(String.valueOf(letter));
     }
 
-    private static void incrementErrorCount(char letter) {
-        if (!secretWord.contains(String.valueOf(letter))) {
-            System.out.printf("Буквы \"%s\" нет в данном слове.\n", letter);
-            mistakeCount++;
-        }
+    private static void addUsedLetters(char letter) {
+        usedLetters = (usedLetters + " " + letter).trim();
+    }
+
+    private static void printUsedLetterMessage() {
+        System.out.println("Буква уже была использована!");
+    }
+
+    private static void printMistakeLetterMessage(char letter) {
+        System.out.printf("Буквы '%s' нет в данном слове.\n", letter);
+    }
+
+    private static boolean isSecretWordLetter(char letter) {
+        String s = String.valueOf(letter);
+        return secretWord.contains(s);
     }
 
     private static void openLetter(char letter) {
@@ -129,6 +141,13 @@ public class Game {
             }
         }
         displayField = String.join(" ", iterateField);
+    }
+
+    private static void showGameRoundStatus() {
+        System.out.printf("Использованные буквы: [%s]\n", usedLetters);
+        System.out.println("Количество ошибок: " + mistakeCount);
+        System.out.printf("[%s]\n", displayField);
+        HangmanRenderer.printHangman(mistakeCount);
     }
 
     private static boolean isGameOver() {

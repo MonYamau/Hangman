@@ -3,7 +3,7 @@ package main.java.util;
 public final class HangmanRenderer {
     private HangmanRenderer() {}
 
-    private static final String[] hangmanStatus = {
+    private static final String[] HANGMAN_STATUS = {
             """
                         _________
                         |
@@ -52,18 +52,18 @@ public final class HangmanRenderer {
                         |     |
                         |     O
                         |    /|\\
-                        |     /
+                        |    /
                         |___________""",
             """
                         _________
                         |     |
                         |     O
                         |    /|\\
-                        |     /\\
+                        |    / \\
                         |___________"""
     };
 
     public static void printHangman(int numPicture) {
-        System.out.println(hangmanStatus[numPicture]);
+        System.out.println(HANGMAN_STATUS[numPicture]);
     }
 }
