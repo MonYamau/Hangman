@@ -15,7 +15,7 @@ public class Game {
     private static final Path PATH = Path.of("/resources/dictionary.txt").toAbsolutePath();
 
     private static final int MAX_ERROR = 7;
-    private static final String MASK_SYMBOL = "_ ";
+    private static final String MASK_SYMBOL = "_";
     private static final String ONE_RUS_LETTER_REGEX = "[а-яёА-ЯЁ]";
     private static final Pattern ONE_RUS_LETTER_PATTERN = Pattern.compile(ONE_RUS_LETTER_REGEX);
     private static final String START = "Н";
@@ -30,7 +30,7 @@ public class Game {
 
     private static String secretWord;
     private static int mistakeCount;
-    private static String displayField;
+    private static StringBuilder displayField;
     private static String usedLetters;
 
 
@@ -44,6 +44,7 @@ public class Game {
             switch (SCANNER.nextLine().toUpperCase()) {
                 case START:
                     startGameRound();
+                    break;
                 case EXIT:
                     return;
                 default:
@@ -55,11 +56,31 @@ public class Game {
     private static void startGameRound() {
         secretWord = generateWord();
         mistakeCount = 0;
-        displayField = makeMask();
+        displayField = new StringBuilder(makeMask());
         usedLetters = "";
         System.out.printf("Начинаем! Загадано слово из %d букв.\n", secretWord.length());
         System.out.printf("[%s]\n", displayField);
+        gameLoop();
+        printResultGameRound();
+    }
 
+    private static String generateWord() {
+        Random random = new Random();
+        List<String> dictionary;
+        try {
+            dictionary = Arrays.asList((Files.readString(PATH)).split(" "));
+        } catch (IOException e) {
+            throw new IllegalStateException("Couldn't read the file: " + PATH.toAbsolutePath());
+        }
+        int randomIndex = random.nextInt(dictionary.size());
+        return dictionary.get(randomIndex);
+    }
+
+    private static String makeMask() {
+        return MASK_SYMBOL.repeat(secretWord.length()).trim();
+    }
+
+    private static void gameLoop() {
         while (!isGameOver()) {
             char letter = inputRussianLetter();
             letter = Character.toUpperCase(letter);
@@ -77,22 +98,6 @@ public class Game {
                 printUsedLetterMessage();
             }
         }
-    }
-
-    private static String generateWord() {
-        Random random = new Random();
-        List<String> dictionary;
-        try {
-            dictionary = Arrays.asList((Files.readString(PATH)).split(" "));
-        } catch (IOException e) {
-            throw new IllegalStateException("Couldn't read the file: " + PATH.toAbsolutePath());
-        }
-        int randomIndex = random.nextInt(dictionary.size());
-        return dictionary.get(randomIndex);
-    }
-
-    private static String makeMask() {
-        return MASK_SYMBOL.repeat(secretWord.length()).trim();
     }
 
     private static char inputRussianLetter() {
@@ -133,14 +138,11 @@ public class Game {
     }
 
     private static void openLetter(char letter) {
-        List<String> iterateWord = new ArrayList<>(Arrays.asList(secretWord.split("")));
-        List<String> iterateField = new ArrayList<>(Arrays.asList(displayField.split(" ")));
         for (int i = 0; i < secretWord.length(); i++) {
-            if (iterateWord.get(i).equals(String.valueOf(letter))) {
-                iterateField.set(i, String.valueOf(letter));
+            if (secretWord.charAt(i) == letter) {
+                displayField.setCharAt(i, letter);
             }
         }
-        displayField = String.join(" ", iterateField);
     }
 
     private static void showGameRoundStatus() {
@@ -151,14 +153,32 @@ public class Game {
     }
 
     private static boolean isGameOver() {
-        if (mistakeCount == MAX_ERROR) {
-            System.out.printf("Ты проиграл Х_Х\nЗагаданное слово: %s\n" + INSTRUCTIONS_SCRIPT, secretWord);
-            processStartChoice();
+        return isLose() || isWin();
+    }
+
+    private static boolean isWin() {
+        return !displayField.toString().contains(MASK_SYMBOL);
+    }
+
+    private static boolean isLose() {
+        return mistakeCount == MAX_ERROR;
+    }
+
+    private static void printResultGameRound() {
+        if (isWin()) {
+            printWinMessage();
+        } else {
+            printLoseMessage();
         }
-        if (!displayField.contains("_")) {
-            System.out.printf("ТЫ ВЫИГРАЛ! ^О^\nЗагаданное слово: %s\n" + INSTRUCTIONS_SCRIPT, secretWord);
-            processStartChoice();
-        }
-        return false;
+        System.out.println("Загаданное слово: " + secretWord);
+        System.out.println(INSTRUCTIONS_SCRIPT);
+    }
+
+    private static void printWinMessage() {
+        System.out.println("ТЫ ВЫИГРАЛ! ^О^");
+    }
+
+    private static void printLoseMessage() {
+        System.out.println("Ты проиграл Х_Х");
     }
 }
