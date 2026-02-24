@@ -1,18 +1,17 @@
 package main.java;
 
-import main.java.util.HangmanRenderer;
+import main.java.utils.HangmanRenderer;
+import main.java.utils.Dictionary;
 
-import java.io.IOException;
+
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Game {
     private static final Scanner SCANNER = new Scanner(System.in, StandardCharsets.UTF_8);
-    private static final Path PATH = Path.of("/resources/dictionary.txt").toAbsolutePath();
 
     private static final int MAX_ERROR = 7;
     private static final String MASK_SYMBOL = "_";
@@ -36,7 +35,13 @@ public class Game {
 
     public static void main(String[] args) {
         System.out.printf("Привет! " + INSTRUCTIONS_SCRIPT);
-        processStartChoice();
+        try {
+            processStartChoice();
+        } catch (UncheckedIOException e){
+            System.err.println("Ошибка чтения файла. Работа программы прекращена.");
+            System.err.println(e.getMessage());
+        }
+
     }
 
     private static void processStartChoice() {
@@ -53,8 +58,8 @@ public class Game {
         }
     }
 
-    private static void startGameRound() {
-        secretWord = generateWord();
+    private static void startGameRound()  {
+        secretWord = Dictionary.generateWord();
         mistakeCount = 0;
         displayField = new StringBuilder(makeMask());
         usedLetters = "";
@@ -64,20 +69,9 @@ public class Game {
         printResultGameRound();
     }
 
-    private static String generateWord() {
-        Random random = new Random();
-        List<String> dictionary;
-        try {
-            dictionary = Arrays.asList((Files.readString(PATH)).split(" "));
-        } catch (IOException e) {
-            throw new IllegalStateException("Couldn't read the file: " + PATH.toAbsolutePath());
-        }
-        int randomIndex = random.nextInt(dictionary.size());
-        return dictionary.get(randomIndex);
-    }
 
     private static String makeMask() {
-        return MASK_SYMBOL.repeat(secretWord.length()).trim();
+        return MASK_SYMBOL.repeat(secretWord.length());
     }
 
     private static void gameLoop() {

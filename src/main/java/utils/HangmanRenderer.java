@@ -1,4 +1,4 @@
-package main.java.util;
+package main.java.utils;
 
 public final class HangmanRenderer {
     private HangmanRenderer() {}
