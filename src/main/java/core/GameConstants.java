@@ -13,11 +13,4 @@ public class GameConstants {
     public static final Pattern ONE_RUS_LETTER_PATTERN = Pattern.compile(ONE_RUS_LETTER_REGEX);
     public static final String START = "Н";
     public static final String EXIT = "В";
-    public static final String INSTRUCTIONS_SCRIPT = """
-            
-            Желаешь начать новую игру?
-            [Введите '%s', чтобы начать новую игру]
-            [Введите '%s', чтобы выйти]
-            """.formatted(START, EXIT);
-    public static final String INCORRECT_INPUT_SCRIPT = "Некорректный ввод! Введи одну букву кириллицы.";
 }

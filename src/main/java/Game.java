@@ -17,7 +17,8 @@ public class Game {
     private static String usedLetters;
 
     public static void main(String[] args) {
-        System.out.printf("Привет! " + INSTRUCTIONS_SCRIPT);
+        System.out.println("Привет!");
+        printInstructions();
         try {
             processStartChoice();
         } catch (UncheckedIOException e) {
@@ -36,7 +37,7 @@ public class Game {
             if (choice.equals(EXIT)) {
                 return;
             }
-            System.out.println(INCORRECT_INPUT_SCRIPT);
+            printIncorrectInput();
         }
     }
 
@@ -82,7 +83,7 @@ public class Game {
             if (isOneRussianLetter(inputValue)) {
                 return inputValue.charAt(0);
             }
-            System.out.println(INCORRECT_INPUT_SCRIPT);
+            printIncorrectInput();
         }
     }
 
@@ -138,6 +139,6 @@ public class Game {
             printLoseMessage();
         }
         System.out.println("Загаданное слово: " + secretWord);
-        System.out.println(INSTRUCTIONS_SCRIPT);
+        printInstructions();
     }
 }
