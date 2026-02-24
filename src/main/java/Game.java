@@ -3,62 +3,44 @@ package main.java;
 import main.java.utils.HangmanRenderer;
 import main.java.utils.Dictionary;
 
+import static main.java.core.GameConstants.*;
+import static main.java.core.GameMessages.*;
 
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Game {
-    private static final Scanner SCANNER = new Scanner(System.in, StandardCharsets.UTF_8);
-
-    private static final int MAX_ERROR = 7;
-    private static final String MASK_SYMBOL = "_";
-    private static final String ONE_RUS_LETTER_REGEX = "[а-яёА-ЯЁ]";
-    private static final Pattern ONE_RUS_LETTER_PATTERN = Pattern.compile(ONE_RUS_LETTER_REGEX);
-    private static final String START = "Н";
-    private static final String EXIT = "В";
-    private static final String INSTRUCTIONS_SCRIPT = """
-            
-            Желаешь начать новую игру?
-            [Введите '%s', чтобы начать новую игру]
-            [Введите '%s', чтобы выйти]
-            """.formatted(START, EXIT);
-    private static final String INCORRECT_INPUT_SCRIPT = "Некорректный ввод! Введи одну букву кириллицы.";
-
     private static String secretWord;
     private static int mistakeCount;
     private static StringBuilder displayField;
     private static String usedLetters;
 
-
     public static void main(String[] args) {
         System.out.printf("Привет! " + INSTRUCTIONS_SCRIPT);
         try {
             processStartChoice();
-        } catch (UncheckedIOException e){
+        } catch (UncheckedIOException e) {
             System.err.println("Ошибка чтения файла. Работа программы прекращена.");
             System.err.println(e.getMessage());
         }
-
     }
 
     private static void processStartChoice() {
         while (true) {
-            switch (SCANNER.nextLine().toUpperCase()) {
-                case START:
-                    startGameRound();
-                    break;
-                case EXIT:
-                    return;
-                default:
-                    System.out.println(INCORRECT_INPUT_SCRIPT);
+            String choice = SCANNER.nextLine().toUpperCase();
+            if (choice.equals(START)) {
+                startGameRound();
+                continue;
             }
+            if (choice.equals(EXIT)) {
+                return;
+            }
+            System.out.println(INCORRECT_INPUT_SCRIPT);
         }
     }
 
-    private static void startGameRound()  {
+    private static void startGameRound() {
         secretWord = Dictionary.generateWord();
         mistakeCount = 0;
         displayField = new StringBuilder(makeMask());
@@ -68,7 +50,6 @@ public class Game {
         gameLoop();
         printResultGameRound();
     }
-
 
     private static String makeMask() {
         return MASK_SYMBOL.repeat(secretWord.length());
@@ -118,14 +99,6 @@ public class Game {
         usedLetters = (usedLetters + " " + letter).trim();
     }
 
-    private static void printUsedLetterMessage() {
-        System.out.println("Буква уже была использована!");
-    }
-
-    private static void printMistakeLetterMessage(char letter) {
-        System.out.printf("Буквы '%s' нет в данном слове.\n", letter);
-    }
-
     private static boolean isSecretWordLetter(char letter) {
         String s = String.valueOf(letter);
         return secretWord.contains(s);
@@ -166,13 +139,5 @@ public class Game {
         }
         System.out.println("Загаданное слово: " + secretWord);
         System.out.println(INSTRUCTIONS_SCRIPT);
-    }
-
-    private static void printWinMessage() {
-        System.out.println("ТЫ ВЫИГРАЛ! ^О^");
-    }
-
-    private static void printLoseMessage() {
-        System.out.println("Ты проиграл Х_Х");
     }
 }
