@@ -5,10 +5,10 @@ import main.java.utils.Dictionary;
 
 import static main.java.core.GameConstants.*;
 import static main.java.core.GameMessages.*;
+import static main.java.core.InputValidator.*;
 
 import java.io.UncheckedIOException;
 import java.util.*;
-import java.util.regex.Matcher;
 
 public class Game {
     private static String secretWord;
@@ -29,15 +29,15 @@ public class Game {
 
     private static void processStartChoice() {
         while (true) {
-            String choice = SCANNER.nextLine().toUpperCase();
-            if (choice.equals(START)) {
+            char choice = inputRussianLetter();
+            choice = Character.toUpperCase(choice);
+            if (choice == START) {
                 startGameRound();
                 continue;
             }
-            if (choice.equals(EXIT)) {
+            if (choice == EXIT) {
                 return;
             }
-            printIncorrectInput();
         }
     }
 
@@ -74,22 +74,6 @@ public class Game {
                 printUsedLetterMessage();
             }
         }
-    }
-
-    private static char inputRussianLetter() {
-        System.out.println("Попробуй ввести букву:");
-        while (true) {
-            String inputValue = SCANNER.nextLine();
-            if (isOneRussianLetter(inputValue)) {
-                return inputValue.charAt(0);
-            }
-            printIncorrectInput();
-        }
-    }
-
-    private static boolean isOneRussianLetter(String inputValue) {
-        Matcher matcher = ONE_RUS_LETTER_PATTERN.matcher(inputValue);
-        return matcher.matches();
     }
 
     private static boolean isUsedLetter(char letter) {
