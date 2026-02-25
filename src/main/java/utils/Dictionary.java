@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class Dictionary {
+public final class Dictionary {
     private static final Path PATH = Path.of("resources/dictionary.txt").toAbsolutePath();
 
     private Dictionary() {}

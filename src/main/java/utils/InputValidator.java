@@ -1,12 +1,12 @@
-package main.java.core;
+package main.java.utils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static main.java.core.GameConstants.SCANNER;
-import static main.java.core.GameMessages.printIncorrectInput;
-
-public class InputValidator {
+public final class InputValidator {
+    public static final Scanner SCANNER = new Scanner(System.in, StandardCharsets.UTF_8);
     private static final String ONE_RUS_LETTER_REGEX = "[а-яёА-ЯЁ]";
     private static final Pattern ONE_RUS_LETTER_PATTERN = Pattern.compile(ONE_RUS_LETTER_REGEX);
 
@@ -19,7 +19,7 @@ public class InputValidator {
             if (isOneRussianLetter(inputValue)) {
                 return inputValue.charAt(0);
             }
-            printIncorrectInput();
+            System.out.println("Некорректный ввод! Введи одну букву кириллицы.");
         }
     }
 

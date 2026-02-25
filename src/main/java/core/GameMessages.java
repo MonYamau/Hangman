@@ -3,10 +3,8 @@ package main.java.core;
 import static main.java.core.GameConstants.EXIT;
 import static main.java.core.GameConstants.START;
 
-public class GameMessages {
-    public static void printIncorrectInput(){
-        System.out.println("Некорректный ввод! Введи одну букву кириллицы.");
-    }
+public final class GameMessages {
+    private GameMessages() {}
 
     public static void printInstructions(){
         System.out.printf("""

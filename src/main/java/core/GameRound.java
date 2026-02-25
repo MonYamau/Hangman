@@ -1,33 +1,19 @@
-package main.java;
+package main.java.core;
 
-import main.java.utils.HangmanRenderer;
 import main.java.utils.Dictionary;
+import main.java.utils.HangmanRenderer;
 
 import static main.java.core.GameConstants.*;
 import static main.java.core.GameMessages.*;
-import static main.java.core.InputValidator.*;
+import static main.java.utils.InputValidator.inputRussianLetter;
 
-import java.io.UncheckedIOException;
-import java.util.*;
-
-public class Game {
+public class GameRound {
     private static String secretWord;
     private static int mistakeCount;
     private static StringBuilder displayField;
     private static String usedLetters;
 
-    public static void main(String[] args) {
-        System.out.println("Привет!");
-        printInstructions();
-        try {
-            processStartChoice();
-        } catch (UncheckedIOException e) {
-            System.err.println("Ошибка чтения файла. Работа программы прекращена.");
-            System.err.println(e.getMessage());
-        }
-    }
-
-    private static void processStartChoice() {
+    public static void processStartChoice() {
         while (true) {
             char choice = inputRussianLetter();
             choice = Character.toUpperCase(choice);
